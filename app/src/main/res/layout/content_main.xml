@@ -20,11 +20,39 @@
         android:layout_gravity="center"
         android:text="@string/welcome_to_my_shopping_list"/>
 
-    <Button
-        android:id="@+id/addButton"
-        android:text="@string/add_to_bag"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
+        <LinearLayout
+            android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"/>
+        <EditText
+            android:id="@+id/inputItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:layout_weight="3"
+            android:nextFocusUp="@+id/inputItem"
+            android:nextFocusLeft="@+id/inputItem"/>
+        <EditText
+            android:id="@+id/inputSize"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="1"
+            android:singleLine="true"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/addButton"
+            android:text="@string/add_to_bag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+    </LinearLayout>
+
 
     <ListView
         android:id="@+id/list"
