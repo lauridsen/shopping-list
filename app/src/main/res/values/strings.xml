@@ -1,9 +1,26 @@
 <resources>
-    <string name="app_name">ShoppingList</string>
+    <string name="app_name">Shopping List</string>
     <string name="action_settings">Settings</string>
     <string name="action_delete">Delete</string>
     <string name="action_clear">Clear</string>
     <string name="welcome_to_my_shopping_list">Welcome to my shopping list</string>
     <string name="welcome_to_my_shopping_list_hori">Welcome to my horizontal shopping list</string>
     <string name="add_to_bag">Add</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="enterName"> Enter name</string>
+    <string name="myName">Your name: </string>
+
+    <string name="confirmation">Confirmation</string>
+    <string name="areYouSure">Are you sure?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string-array name="measurement_array">
+        <item>kg</item>
+        <item>gr</item>
+        <item>ml</item>
+        <item>L</item>
+        <item>pcs</item>
+    </string-array>
 </resources>
