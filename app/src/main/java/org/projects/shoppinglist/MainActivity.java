@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         }
 
         else if (id == R.id.action_delete) {
+            savedCopies.clear();
             SparseBooleanArray positions = listView.getCheckedItemPositions();
             //Check if items are available to be deleted
             if (bag.size() != 0){
@@ -176,6 +177,22 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
         else if (id == R.id.action_clear) {
             showDialog();
+        }
+
+        else if (id == R.id.action_share) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("My shopping list: ");
+            for (Product bagItem : bag) { //Create string of items
+                sb.append("\n");
+                sb.append(bagItem.toString());
+            }
+            String listToSend = sb.toString();
+
+            intent.putExtra(Intent.EXTRA_TEXT, listToSend); //add the text to the intent
+            intent.setType("text/plain"); //MIME type
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
