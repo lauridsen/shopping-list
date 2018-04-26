@@ -20,6 +20,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseListAdapter;
+import com.firebase.ui.database.FirebaseListOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,14 +37,18 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
     private final int RESULT_CODE_PREFERENCES = 1;
 
-    //save array
-    Map<Integer, Product> savedCopies = new HashMap<>();
+    //firebase
+    DatabaseReference firebaseRoot = FirebaseDatabase.getInstance().getReference();
+    DatabaseReference firebase = FirebaseDatabase.getInstance().getReference().child("items");
 
-    ArrayAdapter<Product> adapter;
+    //save array
+    Map<String, Product> savedCopies = new HashMap<>();
+
+    FirebaseListAdapter<Product> adapter;
     ListView listView;
     ArrayList<Product> bag = new ArrayList<>();
 
-    public ArrayAdapter getMyAdapter()
+    public FirebaseListAdapter<Product> getMyAdapter()
     {
         return adapter;
     }
@@ -51,12 +62,13 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         setSupportActionBar(toolbar);
 
         //Did we have stuff in our bag?
-        if(savedInstanceState != null) {
-            ArrayList<Product> savedBag = savedInstanceState.getParcelableArrayList("savedBag");
-            if(savedBag != null) {
-                bag = savedBag;
-            }
-        }
+        // Not needed with firebase
+//        if(savedInstanceState != null) {
+//            ArrayList<Product> savedBag = savedInstanceState.getParcelableArrayList("savedBag");
+//            if(savedBag != null) {
+//                bag = savedBag;
+//            }
+//        }
 
         //Populate spinner
         final Spinner spinner = (Spinner) findViewById(R.id.inputMeasurement);
@@ -69,18 +81,6 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         spinner.setAdapter(spinnerAdapter);
         spinner.setOnItemSelectedListener(this);
 
-        //getting our listiew - you can check the ID in the xml to see that it
-        //is indeed specified as "list"
-        listView = findViewById(R.id.list);
-        //here we create a new adapter linking the bag and the
-        //listview
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, bag);
-        //setting the adapter on the listview
-        listView.setAdapter(adapter);
-        //here we set the choice mode - meaning in this case we can
-        //only select one item at a time.
-        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-
         //Get input item
         final EditText inputText = findViewById(R.id.inputItem);
         final EditText inputQty = findViewById(R.id.inputSize);
@@ -92,7 +92,10 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             public void onClick(View v) {
                 //adapter.add(inputQty.getText().toString() + " x " + inputText.getText().toString());
                 if(inputText.length() > 0 && inputQty.length() > 0) {
-                    adapter.add(new Product(inputText.getText().toString(), Integer.parseInt(inputQty.getText().toString()), spinner.getSelectedItem().toString()));
+                    //Før Firebase: adapter.add(new Product(inputText.getText().toString(), Integer.parseInt(inputQty.getText().toString()), spinner.getSelectedItem().toString()));
+                    Product p = new Product(inputText.getText().toString(), Integer.parseInt(inputQty.getText().toString()), spinner.getSelectedItem().toString());
+                    firebase.push().setValue(p);
+                    getMyAdapter().notifyDataSetChanged();
                     resetInputFields();
                 } else {
                     Toast toast = Toast.makeText(getApplicationContext(), "Please fill out all values", Toast.LENGTH_SHORT);
@@ -100,19 +103,48 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
                 }
             }
         });
+        //Firebase
+        Query query = FirebaseDatabase.getInstance().getReference().child("items");
 
+        FirebaseListOptions<Product> options = new FirebaseListOptions.Builder<Product>()
+                .setQuery(query, Product.class)
+                .setLayout(android.R.layout.simple_list_item_multiple_choice)
+                .build();
+
+        adapter = new FirebaseListAdapter<Product>(options) {
+            @Override
+            protected void populateView(View v, Product product, int position) {
+                TextView textView = (TextView) v.findViewById(android.R.id.text1);
+                //textView.setTextSize(24); //modify this if you want different size
+                textView.setText(product.toString());
+            }
+        };
+
+        //getting our listiew - you can check the ID in the xml to see that it
+        //is indeed specified as "list"
+        listView = findViewById(R.id.list);
+        //here we create a new adapter linking the bag and the
+        //listview
+        //adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, bag);
+        //setting the adapter on the listview
+        listView.setAdapter(adapter);
+        //here we set the choice mode - meaning in this case we can
+        //only select one item at a time.
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
     }
 
-    public void saveProductCopy(int position, Product product) {
+
+
+    public void saveProductCopy(String position, Product product) {
         savedCopies.put(position, product);
     }
 
     public void reAddDeletedProducts() {
-        for ( Map.Entry<Integer, Product> entry : savedCopies.entrySet()) {
-            int key = entry.getKey();
+        for ( Map.Entry<String, Product> entry : savedCopies.entrySet()) {
+            String key = entry.getKey();
             Product value = entry.getValue();
-            // do something with key and/or tab
-            bag.add(key, value);
+            // Re-add to firebase with key and value
+            firebase.child(key).setValue(value);
         }
         savedCopies.clear();
     }
@@ -144,12 +176,13 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             savedCopies.clear();
             SparseBooleanArray positions = listView.getCheckedItemPositions();
             //Check if items are available to be deleted
-            if (bag.size() != 0){
-                for(int i = bag.size() -1; i > -1; i--) {
+            if (getMyAdapter().getCount() != 0){
+                for(int i = getMyAdapter().getCount() -1; i > -1; i--) {
                     if(positions.get(i)) {
                         System.out.println("Removed: " + i);
-                        saveProductCopy(i, bag.get(i));
-                        bag.remove(i);
+                        saveProductCopy(getMyAdapter().getRef(i).getKey(), getMyAdapter().getItem(i));
+                        //bag.remove(i);
+                        getMyAdapter().getRef(i).setValue(null);
                     }
                 }
 
@@ -161,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
                                 //This code will ONLY be executed in case that
                                 //the user has hit the UNDO button
                                 reAddDeletedProducts();
-                                adapter.notifyDataSetChanged();
+                                getMyAdapter().notifyDataSetChanged();
                             }
                         });
                 if(positions.size() > 0) {
@@ -170,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
                 //Clear selection and notify adapter of changes
                 listView.clearChoices();
-                adapter.notifyDataSetChanged();
+                getMyAdapter().notifyDataSetChanged();
                 resetInputFields();
             }
         }
@@ -184,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
             StringBuilder sb = new StringBuilder();
             sb.append("My shopping list: ");
-            for (Product bagItem : bag) { //Create string of items
+            for (Product bagItem : adapter.getSnapshots()) { //Create string of items
                 sb.append("\n");
                 sb.append(bagItem.toString());
             }
@@ -211,12 +244,10 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
     @Override
     public void onPositiveClicked() {
-        if (bag.size() != 0){
-            bag.clear();
+            firebaseRoot.setValue(null);
             listView.clearChoices();
             adapter.notifyDataSetChanged();
             resetInputFields();
-        }
     }
 
     public static class  MyDialog extends MyDialogFragment {
@@ -256,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         {
             //I can can these methods like this, because they are static
             String name = MyPreferenceFragment.getName(this);
-            String message = "Welcome, "+name;
+            String message = "Welcome, " + name;
             Toast toast = Toast.makeText(this,message,Toast.LENGTH_LONG);
             toast.show();
             updateUI(name);
@@ -272,4 +303,15 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 		/* Here we put code now to save the state */
         outState.putParcelableArrayList("savedBag", bag);
     }
+
+    @Override protected void onStart() {
+        super.onStart();
+        adapter.startListening();
+    }
+
+    @Override protected void onStop() {
+        super.onStop();
+        adapter.stopListening();
+    }
+
 }

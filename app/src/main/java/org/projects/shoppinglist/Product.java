@@ -13,7 +13,32 @@ public class Product implements Parcelable {
     int quantity;
     String measurement;
 
-    public Product() {} //Empty constructor we will need later!
+    //Getter and setters
+    public String getName () {
+        return this.name;
+    }
+
+    public void setName (String name) {
+        this.name = name;
+    }
+
+    public int getQuantity () {
+        return this.quantity;
+    }
+
+    public void setQuantity (int quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getMeasurement () {
+        return this.measurement;
+    }
+
+    public void setMeasurement (String measurement) {
+        this.measurement = measurement;
+    }
+
+    public Product() {} //Empty constructor for Firebase
 
     public Product(String name, int quantity, String measurement)  {
         this.name = name;

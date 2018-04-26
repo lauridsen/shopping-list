@@ -36,13 +36,6 @@
             android:layout_height="wrap_content">
 
             <EditText
-                android:id="@+id/inputItem"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:singleLine="true" />
-
-            <EditText
                 android:id="@+id/inputSize"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -50,6 +43,22 @@
                 android:inputType="number"
                 android:singleLine="true"
                 android:text="1" />
+
+            <Spinner
+                android:id="@+id/inputMeasurement"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:entries="@array/measurement_array" />
+
+            <EditText
+                android:id="@+id/inputItem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:singleLine="true" />
+
+
         </LinearLayout>
 
         <Button
