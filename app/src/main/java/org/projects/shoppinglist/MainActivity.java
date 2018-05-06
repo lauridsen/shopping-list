@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -20,23 +21,21 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.firebase.ui.database.FirebaseListOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements MyDialogFragment.OnPositiveListener, AdapterView.OnItemSelectedListener {
     MyDialogFragment dialog;
-    Context context;
 
     private final int RESULT_CODE_PREFERENCES = 1;
-
     //firebase
     DatabaseReference firebaseRoot = FirebaseDatabase.getInstance().getReference();
     DatabaseReference firebase = FirebaseDatabase.getInstance().getReference().child("items");
@@ -44,6 +43,11 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     //save array
     Map<String, Product> savedCopies = new HashMap<>();
 
+    //Adapter
+    ArrayAdapter<CharSequence> spinnerAdapter;
+    Spinner spinner;
+
+    //Preference
     FirebaseListAdapter<Product> adapter;
     ListView listView;
     ArrayList<Product> bag = new ArrayList<>();
@@ -57,9 +61,15 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Set theme according to time of the day
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
+
         //Needed to get the toolbar to work on older versions
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        boolean chosenUnit = MyPreferenceFragment.chooseUnit(this);
 
         //Did we have stuff in our bag?
         // Not needed with firebase
@@ -70,16 +80,12 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 //            }
 //        }
 
-        //Populate spinner
-        final Spinner spinner = (Spinner) findViewById(R.id.inputMeasurement);
+        // Get spinner in view
+        spinner = (Spinner) findViewById(R.id.inputMeasurement);
+        // Populate spinner
         // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this,
-        R.array.measurement_array, android.R.layout.simple_spinner_item);
-        // Specify the layout to use when the list of choices appears
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinner.setAdapter(spinnerAdapter);
-        spinner.setOnItemSelectedListener(this);
+        // Set unit according to preference
+        updateUI(chosenUnit);
 
         //Get input item
         final EditText inputText = findViewById(R.id.inputItem);
@@ -275,10 +281,23 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         inputText.setText("");
     }
 
-    public void updateUI(String name)
+    public void updateUI(boolean unit)
     {
-        TextView myName = findViewById(R.id.myName);
-        myName.setText(name);
+        if(unit) {
+            spinnerAdapter = ArrayAdapter.createFromResource(this,
+                    R.array.measurement_array_metric, android.R.layout.simple_spinner_item);
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            // Apply the adapter to the spinner
+            spinner.setAdapter(spinnerAdapter);
+            spinner.setOnItemSelectedListener(this);
+        } else {
+            spinnerAdapter = ArrayAdapter.createFromResource(this,
+                    R.array.measurement_array_imperial, android.R.layout.simple_spinner_item);
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            // Apply the adapter to the spinner
+            spinner.setAdapter(spinnerAdapter);
+            spinner.setOnItemSelectedListener(this);
+        }
     }
 
     @Override
@@ -286,11 +305,16 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         if (requestCode==RESULT_CODE_PREFERENCES) //the code means we came back from settings
         {
             //I can can these methods like this, because they are static
-            String name = MyPreferenceFragment.getName(this);
-            String message = "Welcome, " + name;
+            boolean unit = MyPreferenceFragment.chooseUnit(this);
+            String message;
+            if(unit) {
+                message = "Metric units chosen";
+            } else {
+                message = "Imperial units chosen";
+            }
             Toast toast = Toast.makeText(this,message,Toast.LENGTH_LONG);
             toast.show();
-            updateUI(name);
+            updateUI(unit);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

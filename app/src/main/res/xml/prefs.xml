@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <EditTextPreference
-        android:key="name"
-        android:defaultValue="@string/enterName"
-        android:summary="Enter your name"
-        android:title="Name"
-        android:singleLine="true" />
+    <!--<EditTextPreference-->
+        <!--android:key="name"-->
+        <!--android:defaultValue="@string/enterName"-->
+        <!--android:summary="Enter your name"-->
+        <!--android:title="Name"-->
+        <!--android:singleLine="true" />-->
+
+    <CheckBoxPreference
+        android:key="unit"
+        android:defaultValue="true"
+        android:summary="Use Metric Units"
+        android:title="Metric"/>
 
 </PreferenceScreen>

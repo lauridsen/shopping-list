@@ -17,11 +17,21 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
-    <string-array name="measurement_array">
+    <string-array name="measurement_array_metric">
         <item>kg</item>
         <item>gr</item>
         <item>ml</item>
         <item>L</item>
         <item>pcs</item>
     </string-array>
+
+    <string-array name="measurement_array_imperial">
+        <item>lb</item>
+        <item>cup</item>
+        <item>oz</item>
+        <item>gal</item>
+        <item>pcs</item>
+    </string-array>
+
+
 </resources>

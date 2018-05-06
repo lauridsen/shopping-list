@@ -25,8 +25,11 @@ dependencies {
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:design:26.1.0'
     compile 'com.google.firebase:firebase-core:11.8.0'
+    implementation 'com.google.firebase:firebase-messaging:11.8.0'
     compile 'com.google.firebase:firebase-database:11.8.0'
     compile 'com.firebaseui:firebase-ui:3.2.2'
+    compile 'com.crashlytics.sdk.android:crashlytics:2.9.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'io.fabric'
