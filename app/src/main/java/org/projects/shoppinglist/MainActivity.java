@@ -12,6 +12,7 @@ import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -123,6 +124,11 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
                 TextView textView = (TextView) v.findViewById(android.R.id.text1);
                 //textView.setTextSize(24); //modify this if you want different size
                 textView.setText(product.toString());
+                // Get params of view
+                ViewGroup.LayoutParams params = v.getLayoutParams();
+                // Set height of each listview item
+                params.height = 180;
+                v.setLayoutParams(params);
             }
         };
 
@@ -186,7 +192,9 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
                 for(int i = getMyAdapter().getCount() -1; i > -1; i--) {
                     if(positions.get(i)) {
                         System.out.println("Removed: " + i);
-                        saveProductCopy(getMyAdapter().getRef(i).getKey(), getMyAdapter().getItem(i));
+                        String key = getMyAdapter().getRef(i).getKey();
+                        Product ware = getMyAdapter().getItem(i);
+                        saveProductCopy(key, ware);
                         //bag.remove(i);
                         getMyAdapter().getRef(i).setValue(null);
                     }
@@ -250,10 +258,11 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
     @Override
     public void onPositiveClicked() {
-            firebaseRoot.setValue(null);
-            listView.clearChoices();
-            adapter.notifyDataSetChanged();
-            resetInputFields();
+        //Clear whole shoppinglist
+        firebaseRoot.setValue(null);
+        listView.clearChoices();
+        adapter.notifyDataSetChanged();
+        resetInputFields();
     }
 
     public static class  MyDialog extends MyDialogFragment {
@@ -283,6 +292,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
     public void updateUI(boolean unit)
     {
+        //Set UI according to chosen unit (imperiaæl / metric)
         if(unit) {
             spinnerAdapter = ArrayAdapter.createFromResource(this,
                     R.array.measurement_array_metric, android.R.layout.simple_spinner_item);

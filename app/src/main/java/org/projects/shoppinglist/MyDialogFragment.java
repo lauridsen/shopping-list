@@ -12,10 +12,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 
 
-//You can pretty much reuse this class in your own project
-//if you want you can modify some of the text shown below.
-//of course if it was for a multilingual app you would put
-//the actual text that is now hardcoded inside the strings.xml file
 public class MyDialogFragment extends DialogFragment {
 
     public MyDialogFragment()
@@ -90,7 +86,6 @@ public class MyDialogFragment extends DialogFragment {
     //method defined in the ACTIVITY!
     protected void positiveClick()
     {
-
         mCallback.onPositiveClicked();
     }
 

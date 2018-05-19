@@ -8,7 +8,7 @@
         <!--android:title="Name"-->
         <!--android:singleLine="true" />-->
 
-    <CheckBoxPreference
+    <SwitchPreference
         android:key="unit"
         android:defaultValue="true"
         android:summary="Use Metric Units"

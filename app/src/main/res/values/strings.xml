@@ -26,7 +26,7 @@
     </string-array>
 
     <string-array name="measurement_array_imperial">
-        <item>lb</item>
+        <item>lbs</item>
         <item>cup</item>
         <item>oz</item>
         <item>gal</item>
