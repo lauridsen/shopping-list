@@ -25,9 +25,14 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.firebase.ui.database.FirebaseListOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,9 +42,15 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     MyDialogFragment dialog;
 
     private final int RESULT_CODE_PREFERENCES = 1;
+    //Firebase authentication
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseUser mFirebaseUser;
+
     //firebase
-    DatabaseReference firebaseRoot = FirebaseDatabase.getInstance().getReference();
-    DatabaseReference firebase = FirebaseDatabase.getInstance().getReference().child("items");
+    DatabaseReference firebaseRoot;
+    DatabaseReference firebaseUserRoot;
+    DatabaseReference firebase;
+
 
     //save array
     Map<String, Product> savedCopies = new HashMap<>();
@@ -53,8 +64,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     ListView listView;
     ArrayList<Product> bag = new ArrayList<>();
 
-    public FirebaseListAdapter<Product> getMyAdapter()
-    {
+    public FirebaseListAdapter<Product> getMyAdapter() {
         return adapter;
     }
 
@@ -63,12 +73,49 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Set theme according to time of the day
+        //Firebase authentication
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
+        firebaseRoot = FirebaseDatabase.getInstance().getReference();
+        firebaseUserRoot = FirebaseDatabase.getInstance().getReference().child("/users/" + mFirebaseUser.getUid() + "/items");
+        firebase = FirebaseDatabase.getInstance().getReference().child("/users/" + mFirebaseUser.getUid() + "/items");
+
+        if (mFirebaseUser == null) {
+            //Not signed in, launch the Sign In Activity
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        } else {
+            Toast toast = Toast.makeText(getApplicationContext(), "Logged in as: " + mFirebaseUser.getEmail(), Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        //Set theme according to time of the day / night
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
 
         //Needed to get the toolbar to work on older versions
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        FirebaseDatabase.getInstance().getReference().child("/users/" + mFirebaseUser.getUid() + "/username").addListenerForSingleValueEvent(
+                new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String shoppingName = dataSnapshot.getValue(String.class);
+                        if(shoppingName != null) {
+                            String foundName = shoppingName;
+                            if(foundName != null) {
+                                getSupportActionBar().setTitle(foundName + "'s Shopping List");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                }
+        );
 
         boolean chosenUnit = MyPreferenceFragment.chooseUnit(this);
 
@@ -92,13 +139,13 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         final EditText inputText = findViewById(R.id.inputItem);
         final EditText inputQty = findViewById(R.id.inputSize);
 
-        Button addButton =  findViewById(R.id.addButton);
+        Button addButton = findViewById(R.id.addButton);
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //adapter.add(inputQty.getText().toString() + " x " + inputText.getText().toString());
-                if(inputText.length() > 0 && inputQty.length() > 0) {
+                if (inputText.length() > 0 && inputQty.length() > 0) {
                     //Før Firebase: adapter.add(new Product(inputText.getText().toString(), Integer.parseInt(inputQty.getText().toString()), spinner.getSelectedItem().toString()));
                     Product p = new Product(inputText.getText().toString(), Integer.parseInt(inputQty.getText().toString()), spinner.getSelectedItem().toString());
                     firebase.push().setValue(p);
@@ -111,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             }
         });
         //Firebase
-        Query query = FirebaseDatabase.getInstance().getReference().child("items");
+        Query query = FirebaseDatabase.getInstance().getReference().child("/users/" + mFirebaseUser.getUid() + "/items");
 
         FirebaseListOptions<Product> options = new FirebaseListOptions.Builder<Product>()
                 .setQuery(query, Product.class)
@@ -146,13 +193,12 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     }
 
 
-
     public void saveProductCopy(String position, Product product) {
         savedCopies.put(position, product);
     }
 
     public void reAddDeletedProducts() {
-        for ( Map.Entry<String, Product> entry : savedCopies.entrySet()) {
+        for (Map.Entry<String, Product> entry : savedCopies.entrySet()) {
             String key = entry.getKey();
             Product value = entry.getValue();
             // Re-add to firebase with key and value
@@ -178,20 +224,17 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         if (id == R.id.action_settings) {
             //Start our settingsactivity and listen to result - i.e.
             //when it is finished.
-            Intent intent = new Intent(this,SettingsActivity.class);
-            startActivityForResult(intent,RESULT_CODE_PREFERENCES);
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivityForResult(intent, RESULT_CODE_PREFERENCES);
             //notice the 1 here - this is the code we then listen for in the
             //onActivityResult
-        }
-
-        else if (id == R.id.action_delete) {
+        } else if (id == R.id.action_delete) {
             savedCopies.clear();
             SparseBooleanArray positions = listView.getCheckedItemPositions();
             //Check if items are available to be deleted
-            if (getMyAdapter().getCount() != 0){
-                for(int i = getMyAdapter().getCount() -1; i > -1; i--) {
-                    if(positions.get(i)) {
-                        System.out.println("Removed: " + i);
+            if (getMyAdapter().getCount() != 0) {
+                for (int i = getMyAdapter().getCount() - 1; i > -1; i--) {
+                    if (positions.get(i)) {
                         String key = getMyAdapter().getRef(i).getKey();
                         Product ware = getMyAdapter().getItem(i);
                         saveProductCopy(key, ware);
@@ -211,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
                                 getMyAdapter().notifyDataSetChanged();
                             }
                         });
-                if(positions.size() > 0) {
+                if (positions.size() > 0) {
                     snackbar.show();
                 }
 
@@ -220,13 +263,9 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
                 getMyAdapter().notifyDataSetChanged();
                 resetInputFields();
             }
-        }
-
-        else if (id == R.id.action_clear) {
+        } else if (id == R.id.action_clear) {
             showDialog();
-        }
-
-        else if (id == R.id.action_share) {
+        } else if (id == R.id.action_share) {
             Intent intent = new Intent(Intent.ACTION_SEND);
 
             StringBuilder sb = new StringBuilder();
@@ -240,6 +279,10 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             intent.putExtra(Intent.EXTRA_TEXT, listToSend); //add the text to the intent
             intent.setType("text/plain"); //MIME type
             startActivity(intent);
+        } else if (id == R.id.action_log_out) {
+            mFirebaseAuth.signOut();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -259,13 +302,13 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     @Override
     public void onPositiveClicked() {
         //Clear whole shoppinglist
-        firebaseRoot.setValue(null);
+        firebaseUserRoot.setValue(null);
         listView.clearChoices();
         adapter.notifyDataSetChanged();
         resetInputFields();
     }
 
-    public static class  MyDialog extends MyDialogFragment {
+    public static class MyDialog extends MyDialogFragment {
         @Override
         protected void negativeClick() {
             //Here we override the method and can now do something
@@ -290,10 +333,9 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         inputText.setText("");
     }
 
-    public void updateUI(boolean unit)
-    {
+    public void updateUI(boolean unit) {
         //Set UI according to chosen unit (imperiaæl / metric)
-        if(unit) {
+        if (unit) {
             spinnerAdapter = ArrayAdapter.createFromResource(this,
                     R.array.measurement_array_metric, android.R.layout.simple_spinner_item);
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -312,17 +354,17 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode==RESULT_CODE_PREFERENCES) //the code means we came back from settings
+        if (requestCode == RESULT_CODE_PREFERENCES) //the code means we came back from settings
         {
             //I can can these methods like this, because they are static
             boolean unit = MyPreferenceFragment.chooseUnit(this);
             String message;
-            if(unit) {
+            if (unit) {
                 message = "Metric units chosen";
             } else {
                 message = "Imperial units chosen";
             }
-            Toast toast = Toast.makeText(this,message,Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
             toast.show();
             updateUI(unit);
         }
@@ -334,16 +376,18 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-		/* Here we put code now to save the state */
+        /* Here we put code now to save the state */
         outState.putParcelableArrayList("savedBag", bag);
     }
 
-    @Override protected void onStart() {
+    @Override
+    protected void onStart() {
         super.onStart();
         adapter.startListening();
     }
 
-    @Override protected void onStop() {
+    @Override
+    protected void onStop() {
         super.onStop();
         adapter.stopListening();
     }

@@ -21,7 +21,12 @@
         <ListView
             android:id="@+id/list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:divider="@color/colorLightGrey"
+            android:dividerHeight="10dp"
+            android:background="@android:color/white"
+            android:footerDividersEnabled="true"/>
+
     </LinearLayout>
 
     <LinearLayout
@@ -42,7 +47,10 @@
                 android:layout_weight="1"
                 android:inputType="number"
                 android:singleLine="true"
-                android:text="1" />
+                android:focusableInTouchMode="true"
+                android:hint="@string/hint_quantity"
+                android:textColorHint="@color/colorMediumGrey"
+                />
 
             <Spinner
                 android:id="@+id/inputMeasurement"
@@ -56,7 +64,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
-                android:singleLine="true" />
+                android:nextFocusLeft="@+id/inputItem"
+                android:nextFocusUp="@+id/inputItem"
+                android:singleLine="true"
+                android:focusableInTouchMode="true"
+                android:hint="@string/hint_ware"
+                android:textColorHint="@color/colorMediumGrey"/>
 
 
         </LinearLayout>
@@ -65,7 +78,9 @@
             android:id="@+id/addButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/add_to_bag" />
+            android:text="@string/add_to_bag"
+            android:background="@color/colorAccent"
+            android:textColor="@android:color/white"/>
     </LinearLayout>
 
 
