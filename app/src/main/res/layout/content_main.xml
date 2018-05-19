@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:divider="@color/colorLightGrey"
             android:dividerHeight="10dp"
-            android:background="@android:color/white"
+            android:background="@color/colorListViewBackground"
             android:footerDividersEnabled="true"/>
 
     </LinearLayout>
