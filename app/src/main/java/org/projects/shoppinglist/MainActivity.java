@@ -1,13 +1,12 @@
 package org.projects.shoppinglist;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.text.Html;
 import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -169,8 +168,8 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             @Override
             protected void populateView(View v, Product product, int position) {
                 TextView textView = (TextView) v.findViewById(android.R.id.text1);
-                //textView.setTextSize(24); //modify this if you want different size
-                textView.setText(product.toString());
+                //Output text
+                textView.setText(Html.fromHtml(product.toString()));
                 // Get params of view
                 ViewGroup.LayoutParams params = v.getLayoutParams();
                 // Set height of each listview item
@@ -193,17 +192,20 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     }
 
 
-    public void saveProductCopy(String position, Product product) {
-        savedCopies.put(position, product);
+    public void saveProductCopy(String key, Product ware) {
+        //Add key and ware to hashMap as key/value pair
+        savedCopies.put(key, ware);
     }
 
     public void reAddDeletedProducts() {
+        //Loop through the hashmap
         for (Map.Entry<String, Product> entry : savedCopies.entrySet()) {
             String key = entry.getKey();
             Product value = entry.getValue();
             // Re-add to firebase with key and value
             firebase.child(key).setValue(value);
         }
+        //Delete saved copies
         savedCopies.clear();
     }
 
@@ -229,16 +231,23 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             //notice the 1 here - this is the code we then listen for in the
             //onActivityResult
         } else if (id == R.id.action_delete) {
+            //Delete saved copies if any
             savedCopies.clear();
+            //Create array with mappings of checked positions: boolean true at checked positions, false if unchecked
             SparseBooleanArray positions = listView.getCheckedItemPositions();
             //Check if items are available to be deleted
             if (getMyAdapter().getCount() != 0) {
+                //Loop through the list from the bottom and up to prevent getting wrong key, as the list shifts.
                 for (int i = getMyAdapter().getCount() - 1; i > -1; i--) {
+                    //Check if anything is at the selected position
                     if (positions.get(i)) {
+                        //Get the firebase key of the item at the selected position
                         String key = getMyAdapter().getRef(i).getKey();
+                        //Get the product at the specific position
                         Product ware = getMyAdapter().getItem(i);
+                        //Add product
                         saveProductCopy(key, ware);
-                        //bag.remove(i);
+                        //Delete product
                         getMyAdapter().getRef(i).setValue(null);
                     }
                 }
@@ -254,6 +263,8 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
                                 getMyAdapter().notifyDataSetChanged();
                             }
                         });
+
+                //Did anything get deleted?
                 if (positions.size() > 0) {
                     snackbar.show();
                 }
@@ -311,9 +322,8 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     public static class MyDialog extends MyDialogFragment {
         @Override
         protected void negativeClick() {
-            //Here we override the method and can now do something
             Toast toast = Toast.makeText(getActivity(),
-                    "negative button clicked", Toast.LENGTH_SHORT);
+                    "Clear cancelled", Toast.LENGTH_SHORT);
             toast.show();
         }
 

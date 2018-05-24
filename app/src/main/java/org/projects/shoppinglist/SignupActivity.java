@@ -11,7 +11,6 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -25,7 +24,6 @@ public class SignupActivity extends AppCompatActivity {
 
     private EditText inputEmail, inputPassword, inputUsername;
     private Button btnSignIn, btnSignUp;
-    private ProgressBar progressBar;
     private FirebaseAuth auth;
     private DatabaseReference firebaseRoot;
 
@@ -43,7 +41,6 @@ public class SignupActivity extends AppCompatActivity {
         inputEmail = (EditText) findViewById(R.id.email);
         inputPassword = (EditText) findViewById(R.id.password);
         inputUsername = (EditText) findViewById(R.id.username);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,16 +77,12 @@ public class SignupActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Show ProgressBar while signing up
-                progressBar.setVisibility(View.VISIBLE);
-
                 // Create user
                 auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 Toast.makeText(SignupActivity.this, "Your account was successfully created: " + task.isSuccessful(), Toast.LENGTH_SHORT).show();
-                                progressBar.setVisibility(View.GONE);
                                 // If sign in fails, display a message to the user.
                                 // If sign in succeeds, send user to MainActivity
                                 if (!task.isSuccessful()) {
@@ -112,7 +105,5 @@ public class SignupActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Remove Progress Bar if app resumes
-        progressBar.setVisibility(View.GONE);
     }
 }

@@ -42,7 +42,7 @@ public class MyDialogFragment extends DialogFragment {
             //This kills the program, because we have not
             //implemented the interface in the activity
             throw new ClassCastException(activity.toString()
-                    + " must implement OnPositiveListener");
+                    + ". OnPositiveListener not implemented");
         }
     }
 

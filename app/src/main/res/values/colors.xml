@@ -7,5 +7,5 @@
     <color name="colorDarkGrey">#333</color>
     <color name="colorMediumGrey">#777</color>
     <color name="colorListViewBackground">#fff</color>
-    <color name="loginBackgroundColor">#16cbcb</color>
+    <color name="loginBackgroundColor">#fff</color>
 </resources>
