@@ -47,6 +47,19 @@
             android:focusable="true"
             android:focusableInTouchMode="true" />
 
+
+        <EditText
+            android:id="@+id/inputItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:nextFocusLeft="@+id/inputItem"
+            android:nextFocusUp="@+id/inputItem"
+            android:singleLine="true"
+            android:focusableInTouchMode="true"
+            android:hint="@string/hint_ware"
+            android:textColorHint="@color/colorMediumGrey"/>
+
             <EditText
                 android:id="@+id/inputSize"
                 android:layout_width="0dp"
@@ -65,18 +78,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:entries="@array/measurement_array_metric" />
-
-            <EditText
-                android:id="@+id/inputItem"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:nextFocusLeft="@+id/inputItem"
-                android:nextFocusUp="@+id/inputItem"
-                android:singleLine="true"
-                android:focusableInTouchMode="true"
-                android:hint="@string/hint_ware"
-                android:textColorHint="@color/colorMediumGrey"/>
 
 
 
