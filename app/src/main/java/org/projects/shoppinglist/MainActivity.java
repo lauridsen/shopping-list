@@ -50,6 +50,9 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     DatabaseReference firebaseUserRoot;
     DatabaseReference firebase;
 
+    //CrashLytics
+    //Crashlytics.getInstance().crash(); // Force a crash
+
 
     //save array
     Map<String, Product> savedCopies = new HashMap<>();
@@ -76,19 +79,17 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
 
+        if (mFirebaseUser == null) {
+            //Not signed in, launch the Sign In Activity and close the MainAcitivty
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
+
         firebaseRoot = FirebaseDatabase.getInstance().getReference();
         firebaseUserRoot = FirebaseDatabase.getInstance().getReference().child("/users/" + mFirebaseUser.getUid() + "/items");
         firebase = FirebaseDatabase.getInstance().getReference().child("/users/" + mFirebaseUser.getUid() + "/items");
 
-        if (mFirebaseUser == null) {
-            //Not signed in, launch the Sign In Activity
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-            return;
-        } else {
-            Toast toast = Toast.makeText(getApplicationContext(), "Logged in as: " + mFirebaseUser.getEmail(), Toast.LENGTH_LONG);
-            toast.show();
-        }
 
         //Set theme according to time of the day / night
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
@@ -96,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         //Needed to get the toolbar to work on older versions
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Fetch one item from firebase - In this case, we fetch the name of the user if available.
         FirebaseDatabase.getInstance().getReference().child("/users/" + mFirebaseUser.getUid() + "/username").addListenerForSingleValueEvent(
                 new ValueEventListener() {
                     @Override
@@ -159,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         //Firebase
         Query query = FirebaseDatabase.getInstance().getReference().child("/users/" + mFirebaseUser.getUid() + "/items");
 
+        //Populate listview
         FirebaseListOptions<Product> options = new FirebaseListOptions.Builder<Product>()
                 .setQuery(query, Product.class)
                 .setLayout(android.R.layout.simple_list_item_multiple_choice)
@@ -387,7 +391,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         /* Here we put code now to save the state */
-        outState.putParcelableArrayList("savedBag", bag);
+        //outState.putParcelableArrayList("savedBag", bag);
     }
 
     @Override

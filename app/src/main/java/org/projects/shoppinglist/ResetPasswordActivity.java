@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,8 +45,8 @@ public class ResetPasswordActivity extends AppCompatActivity {
 
                 String email = inputEmail.getText().toString().trim();
 
-                if (TextUtils.isEmpty(email)) {
-                    Toast.makeText(getApplication(), "Enter your registered E-Mail", Toast.LENGTH_SHORT).show();
+                if (email.length() == 0) {
+                    Toast.makeText(getApplication(), "Please enter your registered E-Mail", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -56,7 +55,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(ResetPasswordActivity.this, "Check you E-Mail for a reset confirmation", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ResetPasswordActivity.this, "Check your inbox for a link to reset your password", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Toast.makeText(ResetPasswordActivity.this, "Oops! Something went wrong. Try again.", Toast.LENGTH_SHORT).show();
                                 }

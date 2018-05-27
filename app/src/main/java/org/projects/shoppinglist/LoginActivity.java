@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,15 +18,30 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements LoginActivityView {
 
     private EditText inputEmail, inputPassword;
     private FirebaseAuth auth;
     private Button btnSignup, btnLogin, btnReset;
 
+    LoginActivityPresenter presenter;
+
+    // For unit testing purposes
+    public EditText getInputEmail() {
+        return inputEmail;
+    }
+    public EditText getInputPassword() {
+        return inputPassword;
+    }
+    public Button loginButton() {
+        return btnLogin;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        presenter = new LoginActivityPresenter(this);
 
         //Get Firebase auth instance
         auth = FirebaseAuth.getInstance();
@@ -69,17 +83,25 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // !!!!!!!!!!!!!!!
+                // ONLY FOR UNIT TESTING:
+                // presenter.inputTextUpdated("unittest@androiduser.com", "testingpurpose");
+                // !!!!!!!!!!!!!!!
                 String email = inputEmail.getText().toString();
-                final String password = inputPassword.getText().toString();
+                String password = inputPassword.getText().toString();
 
-                if (TextUtils.isEmpty(email)) {
-                    Toast.makeText(getApplicationContext(), "Enter email address!", Toast.LENGTH_SHORT).show();
+                if (email.length() == 0) {
+                    Toast.makeText(getApplicationContext(), "Please enter your email address", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if (TextUtils.isEmpty(password)) {
-                    Toast.makeText(getApplicationContext(), "Enter password!", Toast.LENGTH_SHORT).show();
+                if (password.length() == 0) {
+                    Toast.makeText(getApplicationContext(), "Please enter your password", Toast.LENGTH_SHORT).show();
                     return;
+                }
+
+                if (password.length() < 6) {
+                    inputPassword.setError(getString(R.string.password_length));
                 }
 
                 //authenticate user
@@ -90,21 +112,33 @@ public class LoginActivity extends AppCompatActivity {
                                 // If sign in fails, display a message to the user. If sign in succeeds
                                 // the auth state listener will be notified and logic to handle the
                                 // signed in user can be handled in the listener.
-                                if (!task.isSuccessful()) {
-                                    // there was an error
-                                    if (password.length() < 6) {
-                                        inputPassword.setError(getString(R.string.password_length));
-                                    } else {
-                                        Toast.makeText(LoginActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
-                                    }
-                                } else {
-                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                    startActivity(intent);
+                                if (task.isSuccessful()) {
+                                    presenter.launchOtherActivityButtonClicked(MainActivity.class);
                                     finish();
+                                } else {
+                                    // Something went wrong
+                                    Toast.makeText(LoginActivity.this, getString(R.string.auth_failed), Toast.LENGTH_LONG).show();
                                 }
                             }
                         });
             }
         });
+    }
+
+    // Unit testing Interface
+    @Override
+    public void changeEmailText(String email) {
+        inputEmail.setText(email);
+    }
+
+    @Override
+    public void changePasswordText(String password) {
+        inputPassword.setText(password);
+    }
+
+    @Override
+    public void LaunchOtherActivity(Class activity) {
+        Intent intent = new Intent(LoginActivity.this, activity);
+        startActivity(intent);
     }
 }

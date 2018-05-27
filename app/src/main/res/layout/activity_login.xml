@@ -17,7 +17,8 @@
         android:padding="10dp"
         android:text="@string/login"
         android:textColor="@color/colorPrimary"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:layout_marginBottom="40dp"/>
 
     <EditText
         android:id="@+id/email"
@@ -40,11 +41,9 @@
         android:textColor="@color/colorAccent"
         android:textColorHint="@color/colorAccent" />
 
-    <!-- Login Button -->
-
     <Button
         android:id="@+id/btn_login"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dip"
         android:background="@color/colorAccent"
@@ -53,7 +52,7 @@
 
     <Button
         android:id="@+id/btn_reset_password"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dip"
         android:background="@null"
@@ -61,11 +60,9 @@
         android:textAllCaps="false"
         android:textColor="@color/colorMediumGrey" />
 
-    <!-- Link to Login Screen -->
-
     <Button
         android:id="@+id/btn_signup"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dip"
         android:background="@null"
