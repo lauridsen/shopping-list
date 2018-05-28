@@ -18,7 +18,8 @@ import com.google.firebase.auth.FirebaseAuth;
 public class ResetPasswordActivity extends AppCompatActivity {
 
     private EditText inputEmail;
-    private Button btnReset, btnBack;
+    private Button btnReset;
+    private Button btnBack;
     private FirebaseAuth auth;
 
     @Override
@@ -26,15 +27,20 @@ public class ResetPasswordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reset_password);
 
-        inputEmail = (EditText) findViewById(R.id.email);
-        btnReset = (Button) findViewById(R.id.btn_reset_password);
-        btnBack = (Button) findViewById(R.id.btn_back);
+        inputEmail = findViewById(R.id.email);
+        btnReset = findViewById(R.id.btn_reset_password);
+        btnBack = findViewById(R.id.btn_back);
+
+        if (savedInstanceState != null) {
+            inputEmail.setText(savedInstanceState.getString("savedEmail"));
+        }
 
         auth = FirebaseAuth.getInstance();
 
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Close activity
                 finish();
             }
         });
@@ -57,7 +63,7 @@ public class ResetPasswordActivity extends AppCompatActivity {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(ResetPasswordActivity.this, "Check your inbox for a link to reset your password", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(ResetPasswordActivity.this, "Oops! Something went wrong. Try again.", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ResetPasswordActivity.this, getString(R.string.auth_failed), Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
@@ -65,4 +71,9 @@ public class ResetPasswordActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("savedEmail", inputEmail.getText().toString());
+    }
 }

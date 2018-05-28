@@ -21,8 +21,11 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class SignupActivity extends AppCompatActivity {
 
-    private EditText inputEmail, inputPassword, inputUsername;
-    private Button btnSignIn, btnSignUp;
+    private EditText inputEmail;
+    private EditText  inputPassword;
+    private EditText inputUsername;
+    private Button btnSignIn;
+    private Button btnSignUp;
     private FirebaseAuth auth;
     private DatabaseReference firebaseRoot;
 
@@ -35,11 +38,17 @@ public class SignupActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         firebaseRoot = FirebaseDatabase.getInstance().getReference();
 
-        btnSignIn = (Button) findViewById(R.id.sign_in_button);
-        btnSignUp = (Button) findViewById(R.id.sign_up_button);
-        inputEmail = (EditText) findViewById(R.id.email);
-        inputPassword = (EditText) findViewById(R.id.password);
-        inputUsername = (EditText) findViewById(R.id.username);
+        btnSignIn = findViewById(R.id.sign_in_button);
+        btnSignUp = findViewById(R.id.sign_up_button);
+        inputEmail = findViewById(R.id.email);
+        inputPassword = findViewById(R.id.password);
+        inputUsername = findViewById(R.id.username);
+
+        if(savedInstanceState != null) {
+            inputEmail.setText(savedInstanceState.getString("savedEmail"));
+            inputPassword.setText(savedInstanceState.getString("savedPassword"));
+            inputUsername.setText(savedInstanceState.getString("savedUsername"));
+        }
 
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,24 +90,32 @@ public class SignupActivity extends AppCompatActivity {
                         .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
-                                Toast.makeText(SignupActivity.this, "Your account was successfully created: " + task.isSuccessful(), Toast.LENGTH_SHORT).show();
-                                // If sign in fails, display a message to the user.
+                                Toast.makeText(SignupActivity.this, "Sign Up Success! Welcome", Toast.LENGTH_SHORT).show();
                                 // If sign in succeeds, send user to MainActivity
-                                if (!task.isSuccessful()) {
-                                    Toast.makeText(SignupActivity.this, "Authentication failed." + task.getException(),
-                                            Toast.LENGTH_SHORT).show();
-                                } else {
+                                // If sign in fails, display a message to the user.
+                                if (task.isSuccessful()) {
                                     String username = inputUsername.getText().toString().trim();
                                     User user = new User(username);
                                     firebaseRoot.child("users/" + auth.getUid()).setValue(user);
                                     startActivity(new Intent(SignupActivity.this, MainActivity.class));
                                     finish();
+                                } else {
+                                    Toast.makeText(SignupActivity.this, getString(R.string.auth_failed) + " " + task.getException(),
+                                            Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
 
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("savedEmail", inputEmail.getText().toString());
+        outState.putString("savedPassword", inputPassword.getText().toString());
+        outState.putString("savedUsername", inputUsername.getText().toString());
     }
 
     @Override

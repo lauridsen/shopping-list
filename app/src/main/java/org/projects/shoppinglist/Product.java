@@ -38,6 +38,7 @@ public class Product implements Parcelable {
         this.measurement = measurement;
     }
 
+
     public Product() {} //Empty constructor for Firebase
 
     public Product(String name, int quantity, String measurement)  {
@@ -50,6 +51,8 @@ public class Product implements Parcelable {
     public String toString() {
         return "<b>" + name + "</b>" + " " + quantity + " " + measurement;
     }
+
+    public String toCleanString () { return name + " " + quantity + " " + measurement;}
 
     @Override
     public int describeContents() {

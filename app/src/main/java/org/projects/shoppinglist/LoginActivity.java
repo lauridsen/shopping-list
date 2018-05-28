@@ -20,9 +20,12 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity implements LoginActivityView {
 
-    private EditText inputEmail, inputPassword;
+    private EditText inputEmail;
+    private EditText inputPassword;
     private FirebaseAuth auth;
-    private Button btnSignup, btnLogin, btnReset;
+    private Button btnSignup;
+    private Button btnLogin;
+    private Button btnReset;
 
     LoginActivityPresenter presenter;
 
@@ -57,11 +60,16 @@ public class LoginActivity extends AppCompatActivity implements LoginActivityVie
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        inputEmail = (EditText) findViewById(R.id.email);
-        inputPassword = (EditText) findViewById(R.id.password);
-        btnSignup = (Button) findViewById(R.id.btn_signup);
-        btnLogin = (Button) findViewById(R.id.btn_login);
-        btnReset = (Button) findViewById(R.id.btn_reset_password);
+        inputEmail = findViewById(R.id.email);
+        inputPassword = findViewById(R.id.password);
+        btnSignup =  findViewById(R.id.btn_signup);
+        btnLogin =  findViewById(R.id.btn_login);
+        btnReset =  findViewById(R.id.btn_reset_password);
+
+       if(savedInstanceState != null) {
+           inputEmail.setText(savedInstanceState.getString("savedEmail"));
+           inputPassword.setText(savedInstanceState.getString("savedPassword"));
+        }
 
         //Get Firebase auth instance
         auth = FirebaseAuth.getInstance();
@@ -84,7 +92,7 @@ public class LoginActivity extends AppCompatActivity implements LoginActivityVie
             @Override
             public void onClick(View v) {
                 // !!!!!!!!!!!!!!!
-                // ONLY FOR UNIT TESTING:
+                // ONLY FOR UNIT TESTING - Pre-inputs login info:
                 // presenter.inputTextUpdated("unittest@androiduser.com", "testingpurpose");
                 // !!!!!!!!!!!!!!!
                 String email = inputEmail.getText().toString();
@@ -123,6 +131,13 @@ public class LoginActivity extends AppCompatActivity implements LoginActivityVie
                         });
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("savedEmail", inputEmail.getText().toString());
+        outState.putString("savedPassword", inputPassword.getText().toString());
     }
 
     // Unit testing Interface

@@ -1,7 +1,7 @@
 package org.projects.shoppinglist;
 
 /**
- * Created by pjuke on 19-05-2018.
+ * Created by Michael on 19-05-2018.
  */
 
 public class User {

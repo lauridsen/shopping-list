@@ -1,7 +1,7 @@
 package org.projects.shoppinglist;
 
 /**
- * Created by pjuke on 27-05-2018.
+ * Created by Michael on 27-05-2018.
  */
 
 public class LoginActivityPresenter {

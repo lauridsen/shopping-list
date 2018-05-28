@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
         boolean chosenUnit = MyPreferenceFragment.chooseUnit(this);
 
-        //Did we have stuff in our bag?
+        // Did we have stuff in our bag?
         // Not needed with firebase
 //        if(savedInstanceState != null) {
 //            ArrayList<Product> savedBag = savedInstanceState.getParcelableArrayList("savedBag");
@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             sb.append("My shopping list: ");
             for (Product bagItem : adapter.getSnapshots()) { //Create string of items
                 sb.append("\n");
-                sb.append(bagItem.toString());
+                sb.append(bagItem.toCleanString());
             }
             String listToSend = sb.toString();
 
